@@ -1,6 +1,6 @@
 {
-  "name": "Sistema Integrado de Gestão",
-  "short_name": "SIG PMDF",
+  "name": "Sistema Integrado de Gestão - PROERD PMDF",
+  "short_name": "SIG PROERD",
   "description": "Sistema de Gestão Institucional - Acesso Administrativo e Policial",
   "start_url": "./index.html",
   "display": "standalone",
