@@ -1,0 +1,21 @@
+{
+  "name": "Sistema Integrado de Gestão",
+  "short_name": "SIG PMDF",
+  "description": "Sistema de Gestão Institucional - Acesso Administrativo e Policial",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1b2529",
+  "icons": [
+    {
+      "src": "proerd_icon_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "proerd_icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

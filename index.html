@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIG - Sistema Integrado de Gestão</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1b2529"> <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SIG PMDF">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        /* Tela de carregamento minimalista enquanto redireciona */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="statusCarregamento_SIG">Carregando o sistema...</div>
+
+    <script>
+        /**
+         * Função específica para capturar parâmetros e redirecionar com segurança
+         * para o Google Apps Script, mantendo a arquitetura de roteamento (?modo=).
+         */
+        function executarRedirecionamentoSeguro_SIG() {
+            // URL base do seu Web App do Google Apps Script (Substitua pela sua URL oficial /exec)
+            const urlBaseAppsScript = "https://script.google.com/macros/s/AKfycby2AOGYh4vfByC8X7lWrRD_Mp1-O1yMkqQB9Zk5YXAze0Z8VJ9VNcAOEoqxNs3DbUgJ/exec
+";
+            
+            // Captura qualquer parâmetro existente na URL do GitHub (ex: ?modo=instrutor)
+            const parametrosURL = window.location.search;
+            
+            // Concatena a URL base com os parâmetros capturados de forma segura
+            const urlFinalDeDestino = urlBaseAppsScript + parametrosURL;
+            
+            // O replace() é usado no lugar de href para não poluir o histórico de navegação do celular
+            window.location.replace(urlFinalDeDestino);
+        }
+
+        // Aciona a função assim que o DOM estiver pronto
+        document.addEventListener("DOMContentLoaded", executarRedirecionamentoSeguro_SIG);
+    </script>
+</body>
+</html>
