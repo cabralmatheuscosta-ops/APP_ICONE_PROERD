@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SIG - Sistema Integrado de Gestão</title>
-
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1b2529"> 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SIG PROERD">
     <link rel="apple-touch-icon" href="proerd_icon_192x192.png">
-
     <style>
         /* Remove margens e barras de rolagem da casca externa */
         html, body {
@@ -23,7 +21,6 @@
             background-color: #1b2529; /* Cor oficial do seu tema */
             font-family: Arial, sans-serif;
         }
-
         /* O iframe do Apps Script ocupará 100% da tela de forma oculta até carregar */
         iframe {
             width: 100%;
@@ -31,7 +28,6 @@
             border: none;
             display: none;
         }
-
         /* Tela de carregamento centralizada e estilizada */
         #loader_SIG {
             display: flex;
@@ -42,8 +38,10 @@
             height: 100%;
             color: #ffffff;
             font-size: 16px;
+            text-align: center;
+            padding: 0 24px;
+            box-sizing: border-box;
         }
-
         /* Indicador visual de carregamento (Spinner) */
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.1);
@@ -54,48 +52,98 @@
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Botão de recarregar, exibido só se o carregamento demorar demais */
+        #btnRecarregar_SIG {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 22px;
+            background: #ffffff;
+            color: #1b2529;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-
     <div id="loader_SIG">
-        <div class="spinner"></div>
+        <div class="spinner" id="spinner_SIG"></div>
         <div id="statusTexto">Carregando o sistema...</div>
+        <button id="btnRecarregar_SIG" onclick="window.location.reload()">Recarregar</button>
     </div>
-
-    <iframe id="iframe_SIG" src=""></iframe>
-
+    <iframe id="iframe_SIG" src="" title="SIG PROERD"></iframe>
     <script>
-        function executarArquiteturaIntegrada_SIG() {
-            // Sua URL oficial do Google Apps Script
-            const urlBaseAppsScript = "https://script.google.com/macros/s/AKfycby2AOGYh4vfByC8X7lWrRD_Mp1-O1yMkqQB9Zk5YXAze0Z8VJ9VNcAOEoqxNs3DbUgJ/exec";
-            
-            // Captura de forma dinâmica qualquer parâmetro (ex: ?modo=instrutor) vindo do app/link
-            const parametrosURL = window.location.search;
-            
-            // Une a URL base com os parâmetros capturados
-            const urlFinalDeDestino = urlBaseAppsScript + parametrosURL;
-            
-            const iframe = document.getElementById('iframe_SIG');
-            const loader = document.getElementById('loader_SIG');
-            
-            // Aplica a URL final ao iFrame
-            iframe.src = urlFinalDeDestino;
-            
-            // Quando o Google Apps Script terminar de processar o HTML, faz a transição de tela
-            iframe.onload = function() {
-                loader.style.display = 'none';
-                iframe.style.display = 'block';
-            };
-        }
+        (function() {
+            "use strict";
 
-        // Dispara o iFrame assim que a estrutura base estiver pronta
-        document.addEventListener("DOMContentLoaded", executarArquiteturaIntegrada_SIG);
+            // URL oficial do Google Apps Script.
+            var urlBaseAppsScript = "https://script.google.com/macros/s/AKfycby2AOGYh4vfByC8X7lWrRD_Mp1-O1yMkqQB9Zk5YXAze0Z8VJ9VNcAOEoqxNs3DbUgJ/exec";
+
+            var iframe = document.getElementById('iframe_SIG');
+            var loader = document.getElementById('loader_SIG');
+            var statusTexto = document.getElementById('statusTexto');
+            var spinner = document.getElementById('spinner_SIG');
+            var btnRecarregar = document.getElementById('btnRecarregar_SIG');
+
+            var carregou = false;
+            var timerLento = null;
+            var timerFalha = null;
+
+            // Repassa APENAS parametros conhecidos (nao a query string inteira).
+            // Hoje o backend so entende ?modo=instrutor.
+            function montarParametrosSeguros() {
+                var permitidos = ['modo'];
+                var entrada = new URLSearchParams(window.location.search);
+                var saida = new URLSearchParams();
+                permitidos.forEach(function(chave) {
+                    if (entrada.has(chave)) {
+                        // sanitiza: so letras/numeros, evita valores estranhos na URL
+                        var v = String(entrada.get(chave)).replace(/[^a-zA-Z0-9_-]/g, '');
+                        if (v) saida.set(chave, v);
+                    }
+                });
+                var qs = saida.toString();
+                return qs ? ('?' + qs) : '';
+            }
+
+            function executarArquiteturaIntegrada_SIG() {
+                var urlFinalDeDestino = urlBaseAppsScript + montarParametrosSeguros();
+                iframe.src = urlFinalDeDestino;
+
+                // Sucesso: o Apps Script terminou de renderizar.
+                iframe.onload = function() {
+                    carregou = true;
+                    if (timerLento) clearTimeout(timerLento);
+                    if (timerFalha) clearTimeout(timerFalha);
+                    loader.style.display = 'none';
+                    iframe.style.display = 'block';
+                };
+
+                // Aviso de lentidao (15s): mantem o spinner, so informa.
+                timerLento = setTimeout(function() {
+                    if (!carregou) {
+                        statusTexto.textContent = "O sistema está demorando mais que o normal para carregar...";
+                    }
+                }, 15000);
+
+                // Falha provavel (35s): para o spinner e oferece recarregar.
+                timerFalha = setTimeout(function() {
+                    if (!carregou) {
+                        if (spinner) spinner.style.display = 'none';
+                        statusTexto.textContent = "Não foi possível carregar o sistema. Verifique sua conexão e tente novamente.";
+                        btnRecarregar.style.display = 'inline-block';
+                    }
+                }, 35000);
+            }
+
+            document.addEventListener("DOMContentLoaded", executarArquiteturaIntegrada_SIG);
+        })();
     </script>
 </body>
 </html>
