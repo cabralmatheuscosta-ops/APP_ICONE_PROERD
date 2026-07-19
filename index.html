@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIG PROERD - Sistema Integrado de Gestão</title>
+    <title>SIG - Sistema Integrado de Gestão</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1b2529"> 
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,7 +142,16 @@
                 }, 35000);
             }
 
-            document.addEventListener("DOMContentLoaded", executarArquiteturaIntegrada_SIG);
+            // IMPORTANTE: este <script> fica no fim do <body>, entao o evento
+            // DOMContentLoaded PODE ja ter disparado quando o script roda. Nesse
+            // caso, addEventListener nunca chamaria a funcao e a tela ficaria
+            // presa no "Carregando". Por isso verificamos o estado do DOM:
+            // se ja esta pronto, executa imediatamente; senao, espera o evento.
+            if (document.readyState === 'loading') {
+                document.addEventListener("DOMContentLoaded", executarArquiteturaIntegrada_SIG);
+            } else {
+                executarArquiteturaIntegrada_SIG();
+            }
         })();
     </script>
 </body>
