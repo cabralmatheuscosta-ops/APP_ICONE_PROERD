@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SIG PROERD - Instrutor</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1b2529">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SIG Instrutor">
+    <!-- Caminho relativo à pasta /instrutor/. O icone fica um nivel acima. -->
+    <link rel="apple-touch-icon" href="../proerd_icon_192x192.png">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1b2529;
+            font-family: Arial, sans-serif;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+        #loader_SIG {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            color: #ffffff;
+            font-size: 16px;
+            text-align: center;
+            padding: 0 24px;
+            box-sizing: border-box;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border-left-color: #ffffff;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #btnRecarregar_SIG {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 22px;
+            background: #ffffff;
+            color: #1b2529;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="loader_SIG">
+        <div class="spinner" id="spinner_SIG"></div>
+        <div id="statusTexto">Carregando o sistema do instrutor...</div>
+        <button id="btnRecarregar_SIG" onclick="window.location.reload()">Recarregar</button>
+    </div>
+    <iframe id="iframe_SIG" src="" title="SIG PROERD - Instrutor"></iframe>
+    <script>
+        (function() {
+            "use strict";
+
+            // URL oficial do Google Apps Script.
+            var urlBaseAppsScript = "https://script.google.com/macros/s/AKfycby2AOGYh4vfByC8X7lWrRD_Mp1-O1yMkqQB9Zk5YXAze0Z8VJ9VNcAOEoqxNs3DbUgJ/exec";
+
+            var iframe = document.getElementById('iframe_SIG');
+            var loader = document.getElementById('loader_SIG');
+            var statusTexto = document.getElementById('statusTexto');
+            var spinner = document.getElementById('spinner_SIG');
+            var btnRecarregar = document.getElementById('btnRecarregar_SIG');
+
+            var carregou = false;
+            var timerLento = null;
+            var timerFalha = null;
+
+            // Esta casca e SEMPRE a do instrutor: forca ?modo=instrutor.
+            // Ainda repassa outros parametros conhecidos, se houver.
+            function montarParametrosSeguros() {
+                var saida = new URLSearchParams();
+                saida.set('modo', 'instrutor');   // fixo nesta casca
+                var qs = saida.toString();
+                return qs ? ('?' + qs) : '';
+            }
+
+            function executarArquiteturaIntegrada_SIG() {
+                var urlFinalDeDestino = urlBaseAppsScript + montarParametrosSeguros();
+                iframe.src = urlFinalDeDestino;
+
+                iframe.onload = function() {
+                    carregou = true;
+                    if (timerLento) clearTimeout(timerLento);
+                    if (timerFalha) clearTimeout(timerFalha);
+                    loader.style.display = 'none';
+                    iframe.style.display = 'block';
+                };
+
+                timerLento = setTimeout(function() {
+                    if (!carregou) {
+                        statusTexto.textContent = "O sistema está demorando mais que o normal para carregar...";
+                    }
+                }, 15000);
+
+                timerFalha = setTimeout(function() {
+                    if (!carregou) {
+                        if (spinner) spinner.style.display = 'none';
+                        statusTexto.textContent = "Não foi possível carregar o sistema. Verifique sua conexão e tente novamente.";
+                        btnRecarregar.style.display = 'inline-block';
+                    }
+                }, 35000);
+            }
+
+            // O DOMContentLoaded pode ja ter disparado (script no fim do body).
+            if (document.readyState === 'loading') {
+                document.addEventListener("DOMContentLoaded", executarArquiteturaIntegrada_SIG);
+            } else {
+                executarArquiteturaIntegrada_SIG();
+            }
+        })();
+    </script>
+</body>
+</html>
