@@ -1,21 +1,16 @@
 {
-  "name": "Sistema Integrado de Gestão - PROERD (Instrutor)",
-  "short_name": "SIG Instrutor",
-  "description": "Sistema de Gestão Institucional - Acesso do Instrutor PROERD",
-  "start_url": "./index.html",
+  "id": "./",
+  "name": "SIG PROERD - Instrutor",
+  "short_name": "SIG PROERD",
+  "description": "Sistema Integrado de Gestão do PROERD PMDF - acesso do instrutor",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "orientation": "any",
+  "background_color": "#1b2529",
   "theme_color": "#1b2529",
   "icons": [
-    {
-      "src": "../proerd_icon_192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "../proerd_icon_512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "../proerd_icon_192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../proerd_icon_512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }
