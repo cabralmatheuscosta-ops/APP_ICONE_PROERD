@@ -1,0 +1,3 @@
+# SIG PROERD - casca de acesso. Não indexar.
+User-agent: *
+Disallow: /
