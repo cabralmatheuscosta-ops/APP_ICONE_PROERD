@@ -64,6 +64,29 @@
     }, 35000);
   }
 
+  // ---- Memória do dispositivo ("lembrar este dispositivo") --------------
+  // O app roda em iframes do Google, onde o iPhone/Safari apaga ou bloqueia o
+  // armazenamento. A casca guarda o token aqui (armazenamento próprio do
+  // github.io) e só conversa com o app do Google Apps Script.
+  var CHAVES_MEM = ["usuarioSIG", "dispositivoTokenSIG", "usuarioSIG_Policial", "dispositivoTokenSIG_Policial"];
+  var ORIGEM_APP = /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/;
+  window.addEventListener("message", function (ev) {
+    if (!ORIGEM_APP.test(String(ev.origin || ""))) return;
+    var d = ev.data;
+    if (!d || typeof d !== "object" || !d.sigMem) return;
+    try {
+      if (d.sigMem === "set" && CHAVES_MEM.indexOf(d.k) > -1 && typeof d.v === "string" && d.v.length < 300) {
+        localStorage.setItem("sigMem:" + d.k, d.v);
+      } else if (d.sigMem === "del" && CHAVES_MEM.indexOf(d.k) > -1) {
+        localStorage.removeItem("sigMem:" + d.k);
+      } else if (d.sigMem === "get" && ev.source && Array.isArray(d.chaves)) {
+        var valores = {};
+        d.chaves.forEach(function (k) { if (CHAVES_MEM.indexOf(k) > -1) valores[k] = localStorage.getItem("sigMem:" + k) || ""; });
+        ev.source.postMessage({ sigMem: "resp", id: String(d.id || ""), valores: valores }, ev.origin);
+      }
+    } catch (e) {}
+  });
+
   // O script fica no fim do <body>: o DOM pode já estar pronto.
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
   else iniciar();
